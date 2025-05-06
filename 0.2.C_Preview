@@ -1,0 +1,250 @@
+# T1
+#include <stdio.h>
+
+int main() {
+    int n, a;
+    scanf("%d", &n);
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &a);
+        if (a <= 2) {
+            printf("1\n");
+        } else {
+            int prev_prev = 1, prev = 1, current;
+            for (int j = 3; j <= a; j++) {
+                current = prev_prev + prev;
+                prev_prev = prev;
+                prev = current;
+            }
+            printf("%d\n", current);
+        }
+    }
+    return 0;
+}
+
+# T2
+#include <stdio.h>
+
+// 递归计算阶乘
+int factorial(int n) {
+    if (n <= 1) {
+        return 1;
+    }
+    return n * factorial(n - 1);
+}
+
+int main() {
+    int n;
+    scanf("%d", &n);    // 读取输入
+    printf("%d", factorial(n)); // 输出结果
+    return 0;
+}
+
+# T3
+#include <stdio.h>
+#include <stdbool.h>
+
+// 判断是否为质数
+bool is_prime(int n) {
+    if (n < 2) return false;
+    if (n == 2) return true;
+    if (n % 2 == 0) return false;
+    for (int i = 3; i * i <= n; i += 2) {
+        if (n % i == 0) return false;
+    }
+    return true;
+}
+
+int main() {
+    int L;
+    scanf("%d", &L);  // 读取输入的L
+    int sum = 0, count = 0, i = 2;
+
+    // 从2开始依次检查每个数
+    while (1) {
+        if (is_prime(i)) {
+            // 检查是否能装入口袋
+            if (sum + i > L) {
+                break;  // 总和超过L，终止循环
+            }
+            sum += i;       // 更新总和
+            count++;        // 计数加一
+            printf("%d\n", i);  // 输出当前质数
+        }
+        i++;  // 继续下一个数
+    }
+
+    printf("%d\n", count);  // 输出质数的总个数
+    return 0;
+}
+
+# T4
+#include <stdio.h>
+#include <stdlib.h>
+
+// 比较函数，用于qsort排序
+int compare(const void *a, const void *b) {
+    return (*(int*)a - *(int*)b);
+}
+
+int main() {
+    int n;
+    scanf("%d", &n);    // 读取n的值
+    int *arr = (int*)malloc(n * sizeof(int));  // 动态分配数组
+    
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &arr[i]);  // 读取所有数
+    }
+    
+    qsort(arr, n, sizeof(int), compare);  // 调用库函数排序
+    
+    // 输出结果，确保最后一个数没有空格
+    printf("%d", arr[0]);
+    for (int i = 1; i < n; i++) {
+        printf(" %d", arr[i]);
+    }
+    printf("\n");  // 行末换行
+    
+    free(arr);  // 释放内存
+    return 0;
+}
+
+# T5
+#include <stdio.h>
+
+// 检查在给定m值下，是否能在好人死亡前杀死所有坏人
+int check(int k, int m) {
+    int pos = 0; // 当前数到的位置
+    int bad_remain = k; // 剩余坏人数量
+    int total = 2 * k; // 总人数（k个好人 + k个坏人）
+
+    while (bad_remain > 0) {
+        pos = (pos + m - 1) % total; // 计算数到m的人的位置
+        if (pos < k) { // 如果是好人
+            return 0;
+        }
+        bad_remain--; // 坏人被杀死，剩余坏人数量减1
+        total--; // 总人数减1
+    }
+    return 1;
+}
+
+int main() {
+    int k;
+    scanf("%d", &k);
+    int m = k + 1; // 从k + 1开始找（因为m至少要比k大）
+    while (1) {
+        if (check(k, m)) {
+            printf("%d\n", m);
+            break;
+        }
+        m++;
+    }
+    return 0;
+}
+
+# T6
+#include <stdio.h>
+#include <stdlib.h>
+
+// 计算走楼梯的不同走法数量
+int climbStairs(int n) {
+    // 处理特殊情况
+    if (n == 1) return 1;
+    if (n == 2) return 2;
+    // 动态规划数组
+    int *dp = (int *)malloc((n + 1) * sizeof(int));
+    dp[1] = 1;
+    dp[2] = 2;
+    for (int i = 3; i <= n; i++) {
+        dp[i] = dp[i - 1] + dp[i - 2];
+    }
+    int result = dp[n];
+    free(dp);
+    return result;
+}
+int main() {
+    int n;
+    scanf("%d", &n);
+    int ways = climbStairs(n);
+    printf("%d\n", ways);
+    return 0;
+}
+
+# T7
+#include <stdio.h>
+#include <string.h>
+#include <limits.h>
+
+#define MAXN 100005
+#define MOD 100003
+
+// 邻接表节点
+typedef struct Node {
+    int to;
+    struct Node *next;
+} Node;
+
+// 邻接表头
+Node *head[MAXN];
+// 距离数组，记录源点到各点的距离
+int dist[MAXN];
+// 最短路数量数组
+int count[MAXN];
+// 标记数组，记录节点是否已确定最短距离
+int vis[MAXN];
+
+// 添加边
+void addEdge(int u, int v) {
+    Node *newNode = (Node *)malloc(sizeof(Node));
+    newNode->to = v;
+    newNode->next = head[u];
+    head[u] = newNode;
+}
+
+// Dijkstra算法
+void dijkstra(int start) {
+    memset(dist, 0x3f, sizeof(dist));
+    memset(count, 0, sizeof(count));
+    memset(vis, 0, sizeof(vis));
+    dist[start] = 0;
+    count[start] = 1;
+    for (int i = 0; i < MAXN; i++) {
+        int minDist = INT_MAX, minIndex = -1;
+        for (int j = 1; j < MAXN; j++) {
+            if (!vis[j] && dist[j] < minDist) {
+                minDist = dist[j];
+                minIndex = j;
+            }
+        }
+        if (minIndex == -1) break;
+        vis[minIndex] = 1;
+        Node *p = head[minIndex];
+        while (p) {
+            int v = p->to;
+            if (!vis[v]) {
+                if (dist[v] > dist[minIndex] + 1) {
+                    dist[v] = dist[minIndex] + 1;
+                    count[v] = count[minIndex];
+                } else if (dist[v] == dist[minIndex] + 1) {
+                    count[v] = (count[v] + count[minIndex]) % MOD;
+                }
+            }
+            p = p->next;
+        }
+    }
+}
+int main() {
+    int n, m;
+    scanf("%d %d", &n, &m);
+    for (int i = 0; i < m; i++) {
+        int x, y;
+        scanf("%d %d", &x, &y);
+        addEdge(x, y);
+        addEdge(y, x);
+    }
+    dijkstra(1);
+    for (int i = 1; i <= n; i++) {
+        printf("%d\n", count[i]);
+    }
+    return 0;
+}
